@@ -21,7 +21,58 @@
   <img src="MetaMask.png" style="width: 24px; height: 24px; margin-right: 10px;" alt="MetaMask">
   Pay with MetaMask
 </button>
+<script>
+  payButton.addEventListener('click', async () => {
+  if (typeof window.ethereum !== 'undefined') {
+    try {
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      const sender = accounts[0];
+      
+      // Clean up the user input (lowercase to avoid capitalization errors)
+      const chosenMovie = movieInput.value.trim().toLowerCase();
+      
+      let priceInWei = "";
+      let redirectUrl = "";
 
+      // 1. CHECK THE MOVIE NAME AND SET RULES
+      if (chosenMovie === "the maker" || chosenMovie === "the maker (2011)") {
+        priceInWei = "0x38d7ea4c68000"; // Code for the $2.99 price tier
+        redirectUrl = "VividMoveTM.html";
+      } else if (chosenMovie === "code 8" || chosenMovie === "code 8 (2019)") {
+        priceInWei = "0x71afed22eba00"; // Code for the $5.99 price tier
+        redirectUrl = "VividMovieC8.html";
+      } else {
+        // If they typed something that doesn't exist on VividTV
+        alert("Movie not found! Please check the spelling on the Main Page.");
+        return; 
+      }
+
+      // 2. RUN THE METAMASK POPUP
+      const transactionParameters = {
+        to: YOUR_WALLET_ADDRESS,
+        from: sender,
+        value: priceInWei, 
+      };
+
+      const txHash = await window.ethereum.request({
+        method: 'eth_sendTransaction',
+        params: [transactionParameters],
+      });
+
+      // 3. SUCCESS REDIRECT
+      alert("Payment Confirmed! Redirecting to your movie...");
+      window.location.href = redirectUrl; // Sends them straight to the movie page!
+
+    } catch (error) {
+      console.error("Transaction cancelled", error);
+      alert("Payment cancelled.");
+    }
+  } else {
+    alert('Please install MetaMask!');
+  }
+});
+
+</script>
 
 </body>
 </html>
